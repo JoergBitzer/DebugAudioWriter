@@ -1,6 +1,6 @@
 # DebugAudioWriter
 ## Description
-Juce based simple audio signal writer (writes last 10s after button hit in the directory c:\Temp or ~/Temp with the filename TimeSinceIdontKnow_in_ms.wav)
+Juce based simple (very bad code style) audio signal writer (writes last 10s after button hit in the directory c:\Temp or ~/Temp with the filename TimeSinceIdontKnow_in_ms.wav)
 also includes a button to include a click (last sample = 1) at the end of each processed audio block (to see issues on block borders)
 
 ## Build remarks
