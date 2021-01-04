@@ -3,7 +3,7 @@ Juce based simple writer (writes last 10s after button hit)
 
 also includes a button to include a click at the end of a block (to see issues on block borders)
 
-The CMakeLists.txt is not fully operaional. This is a subprojekt. You need the following lines in a CMakeLists.txt -file in a  directory above.
+The CMakeLists.txt is not fully operational. This is a subprojekt. You need the following lines in a CMakeLists.txt -file in a  directory above.
 
 ```console
 cmake_minimum_required(VERSION 3.15)
