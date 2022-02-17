@@ -58,29 +58,22 @@ public:
     void setClick(bool clickstatus){m_withClick = clickstatus; };
 
 	
-	CriticalSection m_writer;
-	double m_fs;
-	int m_nrofchans;
+  	double m_fs;
+	  int m_nrofchans;
 
 // Alternative with abstract FIFO  
-  MemPool m_poolLeft;
-  MemPool m_poolRight;
-  AbstractFifo m_fifocontrol;
-  size_t m_maxSizeofBlock;
-  bool m_withClick;
+    MemPool m_poolLeft;
+    MemPool m_poolRight;
+    AbstractFifo m_fifocontrol;
+    size_t m_maxSizeofBlock;
+    bool m_withClick;
 
 
 private:
-	std::vector<float> m_data;
 
-	double m_len_s;
+  	double m_len_s;
 
 
-/*	File m_outfiledir;
-	File m_outfilename;
-	std::unique_ptr<FileOutputStream> m_outstream;
-	AudioFormatWriter *m_wavewriter;
-	WavAudioFormat wav;//*/
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DebugAudioWriterAudioProcessor)

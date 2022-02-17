@@ -1,9 +1,6 @@
 /*
   ==============================================================================
-
-    This file was auto-generated!
-
-    It contains the basic framework code for a JUCE plugin editor.
+This file allows for an audio block of x seconds to be written on temp directory
 
   ==============================================================================
 */
@@ -123,7 +120,6 @@ void DebugAudioWriterAudioProcessorEditor::saveAudio()
 
 	fileStream.release();
 
-//	processor.m_writer.enter();
 	float* pData2[2];
 	int totalsamples = processor.m_fifocontrol.getNumReady();
 	float* dataLeft = new float[totalsamples];
@@ -145,7 +141,6 @@ void DebugAudioWriterAudioProcessorEditor::saveAudio()
 
 	writer->flush();
 	delete writer;
-	//processor.m_writer.exit();
 }
 
 void DebugAudioWriterAudioProcessorEditor::insertClick()

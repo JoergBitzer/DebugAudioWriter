@@ -108,21 +108,6 @@ void DebugAudioWriterAudioProcessor::prepareToPlay (double sampleRate, int sampl
     m_fifocontrol.setTotalSize(nrofelements);
     m_fifocontrol.reset();
 
-
-	// Use this method as the place to do any pre-playback
-    // initialisation that you need..
-/*	Time timeobj;
-
-	auto tt = timeobj.getCurrentTime();
-
-	String timestr = tt.toString(true,true,true,true);
-	String  dirname= "c:\\temp\\";
-	m_outfilename = String(dirname + "test" + ".wav");
-	m_outstream = std::make_unique<FileOutputStream> (m_outfilename);
-	
-
-	m_wavewriter = wav.createWriterFor(m_outstream.get(), sampleRate, 2, 16, {}, 0);
-*/	
 }
 
 
@@ -160,10 +145,6 @@ void DebugAudioWriterAudioProcessor::processBlock (AudioBuffer<float>& buffer, M
 {
     ScopedNoDenormals noDenormals;
 
-	//ScopedLock sp(m_writer);
-//	m_writer.enter();
-
-
 	int nrofsamples = buffer.getNumSamples();
     auto totalNumInputChannels  = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
@@ -171,23 +152,9 @@ void DebugAudioWriterAudioProcessor::processBlock (AudioBuffer<float>& buffer, M
     if (m_nrofchans>2)
         m_nrofchans = 2;
 
-    // In case we have more outputs than inputs, this code clears any output
-    // channels that didn't contain input data, (because these aren't
-    // guaranteed to be empty - they may contain garbage).
-    // This is here to avoid people getting screaming feedback
-    // when they first compile a plugin, but obviously you don't need to keep
-    // this code if your algorithm always overwrites all the output channels.
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
-    // This is the place where you'd normally do the guts of your plugin's
-    // audio processing...
-    // Make sure to reset the state if your inner loop is processing
-    // the samples and the outer loop is handling the channels.
-    // Alternatively, you can process the samples with the channels
-    // interleaved by keeping the same state.
-   
-    //auto fifo = m_fifocontrol.write(nrofsamples);
     int startindex1,startindex2,blockSize1, blockSize2;
     m_fifocontrol.prepareToWrite(nrofsamples,startindex1,blockSize1,startindex2,blockSize2);
     
@@ -213,7 +180,6 @@ void DebugAudioWriterAudioProcessor::processBlock (AudioBuffer<float>& buffer, M
     if (remaining < m_maxSizeofBlock)
         m_fifocontrol.read(m_maxSizeofBlock);
 
-//	m_writer.exit();
 }
 
 //==============================================================================

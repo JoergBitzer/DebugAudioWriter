@@ -31,12 +31,12 @@ private:
     // access the processor object that created it.
     DebugAudioWriterAudioProcessor& processor;
 
-	TextButton m_button;
-	void saveAudio();
+	  TextButton m_button;
+	  void saveAudio();
 
-	TextButton m_insertButton;
-	void insertClick();
-	bool m_insertclick;
+	  TextButton m_insertButton;
+	  void insertClick();
+	  bool m_insertclick;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DebugAudioWriterAudioProcessorEditor)
 };
