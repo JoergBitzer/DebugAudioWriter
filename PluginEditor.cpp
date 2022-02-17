@@ -123,36 +123,34 @@ void DebugAudioWriterAudioProcessorEditor::saveAudio()
 
 	fileStream.release();
 
-	std::vector<float> dataL;
-	std::vector<float> dataR;
-
-	processor.m_writer.enter();
-	while(processor.m_dataLeft.size() > 0)
+//	processor.m_writer.enter();
+	float* pData2[2];
+	int totalsamples = processor.m_fifocontrol.getNumReady();
+	float* dataLeft = new float[totalsamples];
+	float* dataRight = new float[totalsamples];
+    int startindex1,startindex2,blockSize1, blockSize2;
+    processor.m_fifocontrol.prepareToRead(totalsamples,startindex1,blockSize1,startindex2,blockSize2);
+    memcpy(dataLeft,processor.m_poolLeft.getDirectAccessAt(startindex1*sizeof(float)),blockSize1*sizeof(float));
+    memcpy(dataLeft+blockSize1,processor.m_poolLeft.getDirectAccessAt(startindex2*sizeof(float)),blockSize2*sizeof(float));
+	pData2[0] = dataLeft;
+	if (processor.m_nrofchans == 2)
 	{
-		float* pData[2];
-		dataL = processor.m_dataLeft.front();
-		if (m_insertclick)
-			dataL.at(dataL.size()-1) = 1.0;
-		
-		processor.m_dataLeft.pop();
-		pData[0] = &dataL[0];
-		if (processor.m_nrofchans == 2)
-		{
-			dataR = processor.m_dataRight.front();
-			pData[1] = &dataR[0];
-			processor.m_dataRight.pop();
-		}
-		writer->writeFromFloatArrays(pData, processor.m_nrofchans, dataL.size());
+	    memcpy(dataRight,processor.m_poolRight.getDirectAccessAt(startindex1*sizeof(float)),blockSize1*sizeof(float));
+    	memcpy(dataRight+blockSize1,processor.m_poolRight.getDirectAccessAt(startindex2*sizeof(float)),blockSize2*sizeof(float));
+		pData2[1] = dataRight;
 	}
+	processor.m_fifocontrol.finishedRead (totalsamples);
 
-	processor.m_counter = 0;
+	writer->writeFromFloatArrays(pData2, processor.m_nrofchans,totalsamples);
+
 	writer->flush();
 	delete writer;
-	processor.m_writer.exit();
+	//processor.m_writer.exit();
 }
 
 void DebugAudioWriterAudioProcessorEditor::insertClick()
 {
 	m_insertclick = !m_insertclick;
+	processor.setClick(m_insertclick);
 	repaint();
 }

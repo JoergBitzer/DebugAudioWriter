@@ -11,7 +11,7 @@
 #pragma once
 
 #include <JuceHeader.h>
-
+#include "MemPool.h"
 //==============================================================================
 /**
 */
@@ -55,13 +55,21 @@ public:
     void getStateInformation (MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
 
-	std::queue<std::vector<float>> m_dataLeft;
-	std::queue<std::vector<float>> m_dataRight;
-	int m_datachunks;
-	int m_counter;
+    void setClick(bool clickstatus){m_withClick = clickstatus; };
+
+	
 	CriticalSection m_writer;
 	double m_fs;
 	int m_nrofchans;
+
+// Alternative with abstract FIFO  
+  MemPool m_poolLeft;
+  MemPool m_poolRight;
+  AbstractFifo m_fifocontrol;
+  size_t m_maxSizeofBlock;
+  bool m_withClick;
+
+
 private:
 	std::vector<float> m_data;
 

@@ -14,7 +14,8 @@
 //==============================================================================
 DebugAudioWriterAudioProcessor::DebugAudioWriterAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
-     : AudioProcessor (BusesProperties()
+     :m_fifocontrol(1), AudioProcessor (BusesProperties()
+//     : AudioProcessor (BusesProperties()
                      #if ! JucePlugin_IsMidiEffect
                       #if ! JucePlugin_IsSynth
                        .withInput  ("Input",  AudioChannelSet::stereo(), true)
@@ -23,6 +24,7 @@ DebugAudioWriterAudioProcessor::DebugAudioWriterAudioProcessor()
                      #endif
                        )
 #endif
+
 {
 }
 
@@ -95,9 +97,18 @@ void DebugAudioWriterAudioProcessor::changeProgramName (int index, const String&
 //==============================================================================
 void DebugAudioWriterAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
+    m_withClick = 0;
 	m_fs = sampleRate;
-	m_counter = 0;
+    m_maxSizeofBlock = samplesPerBlock;
 	m_len_s = 10;
+
+    int nrofelements = (m_len_s)*m_fs + samplesPerBlock + 1; 
+    m_poolLeft.setMemSize(nrofelements*sizeof(float));
+    m_poolRight.setMemSize(nrofelements*sizeof(float));
+    m_fifocontrol.setTotalSize(nrofelements);
+    m_fifocontrol.reset();
+
+
 	// Use this method as the place to do any pre-playback
     // initialisation that you need..
 /*	Time timeobj;
@@ -150,18 +161,15 @@ void DebugAudioWriterAudioProcessor::processBlock (AudioBuffer<float>& buffer, M
     ScopedNoDenormals noDenormals;
 
 	//ScopedLock sp(m_writer);
-	m_writer.enter();
-	m_counter++;
+//	m_writer.enter();
+
 
 	int nrofsamples = buffer.getNumSamples();
-	int blocks = static_cast<int> (m_len_s * m_fs / nrofsamples);
-	m_nrofchans = buffer.getNumChannels();
-	m_datachunks = blocks;
-	m_data.resize(nrofsamples);
-	//m_wavewriter->writeFromAudioSampleBuffer(buffer, 0, buffer.getNumSamples());
-
     auto totalNumInputChannels  = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
+    m_nrofchans = totalNumOutputChannels;
+    if (m_nrofchans>2)
+        m_nrofchans = 2;
 
     // In case we have more outputs than inputs, this code clears any output
     // channels that didn't contain input data, (because these aren't
@@ -178,33 +186,34 @@ void DebugAudioWriterAudioProcessor::processBlock (AudioBuffer<float>& buffer, M
     // the samples and the outer loop is handling the channels.
     // Alternatively, you can process the samples with the channels
     // interleaved by keeping the same state.
+   
+    //auto fifo = m_fifocontrol.write(nrofsamples);
+    int startindex1,startindex2,blockSize1, blockSize2;
+    m_fifocontrol.prepareToWrite(nrofsamples,startindex1,blockSize1,startindex2,blockSize2);
+    
 	for (int channel = 0; channel < totalNumInputChannels; ++channel)
 	{
 		auto* channelData = buffer.getWritePointer(channel);
-
-		// ..do something to the data...
-		for (auto idx = 0; idx < nrofsamples; idx++)
-		{
-			m_data[idx] = channelData[idx];
-		}
-		if (channel == 0)
-			m_dataLeft.push(m_data);
-
-		if (channel == 1)
-			m_dataRight.push(m_data);
-
-		if (m_counter > blocks)
-		{
-			if (channel == 0)
-				m_dataLeft.pop();
-
-			if (channel == 1)
-				m_dataRight.pop();
-
-		}
+        if(m_withClick) channelData[0] = 0.5f;
+        if (channel == 0)
+        {
+            memcpy(m_poolLeft.getDirectAccessAt(startindex1*sizeof(float)),channelData,blockSize1*sizeof(float));
+            memcpy(m_poolLeft.getDirectAccessAt(startindex2*sizeof(float)),channelData,blockSize2*sizeof(float));
+        }
+        if (channel == 1)
+        {
+            memcpy(m_poolRight.getDirectAccessAt(startindex1*sizeof(float)),channelData,blockSize1*sizeof(float));
+            memcpy(m_poolRight.getDirectAccessAt(startindex2*sizeof(float)),channelData,blockSize2*sizeof(float));
+        }
 
 	}
-	m_writer.exit();
+    m_fifocontrol.finishedWrite (nrofsamples);
+
+    auto remaining = m_fifocontrol.getFreeSpace();
+    if (remaining < m_maxSizeofBlock)
+        m_fifocontrol.read(m_maxSizeofBlock);
+
+//	m_writer.exit();
 }
 
 //==============================================================================
