@@ -1,5 +1,5 @@
 
-project(DEBUG_AUDIO_WRITER VERSION 0.1.0)
+project(DEBUG_AUDIO_WRITER VERSION 0.1.1)
 
 # `juce_add_plugin` adds a static library target with the name passed as the first argument
 # (AudioPluginExample here). This target is a normal CMake target, but has a lot of extra properties set
@@ -77,7 +77,7 @@ target_compile_definitions(DebugAudioWriter
         # JUCE_WEB_BROWSER and JUCE_USE_CURL would be on by default, but you might not need them.
         JUCE_WEB_BROWSER=0  # If you remove this, add `NEEDS_WEB_BROWSER TRUE` to the `juce_add_plugin` call
         JUCE_USE_CURL=0     # If you remove this, add `NEEDS_CURL TRUE` to the `juce_add_plugin` call
-        JUCE_DISPLAY_SPLASH_SCREEN=0
+        JUCE_DISPLAY_SPLASH_SCREEN=1
         JUCE_REPORT_APP_USAGE=0
         JUCE_VST3_CAN_REPLACE_VST2=0)
 
